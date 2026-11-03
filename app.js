@@ -1,7 +1,7 @@
 /* Varad Agro Industries — no-login static app using Supabase JS.
    Configure SUPABASE_URL and SUPABASE_ANON_KEY in this file before deployment. */
-const SUPABASE_URL = "https://uvzmqjgsdjimksdhjici.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV2em1xamdzZGppbWtzZGhqaWNpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ1MzUzMzMsImV4cCI6MjEwMDExMTMzM30.kSv1uw69IgrZB1E0FVq0Kau1phMKp7kWPKMoQmFBb4w";
+const SUPABASE_URL = "";
+const SUPABASE_ANON_KEY = "";
 const TABLE = "land_records";
 const DIESEL_TABLE = "diesel_records";
 const $ = (id) => document.getElementById(id);
