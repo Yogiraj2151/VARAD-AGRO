@@ -3,64 +3,144 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#f5f0e8" />
+  <meta name="theme-color" content="#3d174d" />
   <title>Varad Agro Industries | Business Hub</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-  <div id="authScreen" class="auth-screen">
-    <div class="auth-card">
+  <div class="ambient ambient-one"></div><div class="ambient ambient-two"></div>
+  <header class="topbar">
+    <a class="brand" href="#" aria-label="Varad Agro home">
       <div class="brand-mark">VA</div>
-      <p class="eyebrow">VARAD AGRO INDUSTRIES</p>
-      <h1>Business, in control.</h1>
-      <p class="muted">Sign in to manage land records, bags, payments and customer accounts.</p>
-      <form id="loginForm">
-        <label>Email<input id="loginEmail" type="email" autocomplete="email" required placeholder="you@example.com"></label>
-        <label>Password<input id="loginPassword" type="password" autocomplete="current-password" required placeholder="Your password"></label>
-        <button class="btn primary full" type="submit">Sign in securely</button>
+      <div><strong>VARAD AGRO INDUSTRIES</strong><span>SHREE SWAMI SAMARTH HARVESTER</span></div>
+    </a>
+    <div class="top-actions"><span class="status-dot"></span><span id="connectionLabel">Connecting to Supabase…</span><button class="btn btn-ghost" id="refreshBtn">↻ Refresh</button></div>
+  </header>
+
+  <main class="shell">
+    <section class="hero">
+      <div><div class="eyebrow">AGRICULTURAL BUSINESS MANAGEMENT</div><h1>Your business,<br><em>beautifully organised.</em></h1><p>Manage land records, bags, customer payments and diesel expenses in one place.</p></div>
+      <div class="hero-badge"><span>🚜</span><div><b>Business Hub</b><small>Live Supabase data</small></div></div>
+    </section>
+
+    <nav class="nav-tabs" aria-label="Main navigation">
+      <button class="nav-tab active" data-page="dashboard">▦ Dashboard</button>
+      <button class="nav-tab" data-page="add">＋ Add Record</button>
+      <button class="nav-tab" data-page="assistant">✦ Business Assistant</button>
+      <button class="nav-tab" data-page="customers">♙ Customers</button>
+      <button class="nav-tab" data-page="analytics">▥ Analytics</button>
+      <button class="nav-tab" data-page="pending">₹ Pending Payments</button>
+      <button class="nav-tab" data-page="manage">☷ Manage Records</button>
+      <button class="nav-tab" data-page="import">⇅ Import / Export</button>
+      <button class="nav-tab" data-page="diesel">⛽ Diesel</button>
+    </nav>
+
+    <div id="notice" class="notice hidden"></div>
+    <section id="page-dashboard" class="page active">
+      <div class="section-heading"><div><div class="eyebrow">OVERVIEW</div><h2>Business overview</h2><p>A live summary calculated from your Supabase records.</p></div><button class="btn btn-soft" id="dashboardExport">Download CSV</button></div>
+      <div class="kpi-grid" id="kpis"></div>
+      <div class="content-grid">
+        <article class="panel"><div class="panel-head"><h3>Payment collection</h3><span class="panel-icon">◉</span></div><div id="paymentChart" class="chart-area"></div><div class="legend"><span><i class="mint"></i>Online</span><span><i class="coral"></i>Cash</span></div></article>
+        <article class="panel"><div class="panel-head"><h3>Top customers by amount paid</h3><span class="panel-icon">↗</span></div><div id="topCustomers" class="bar-list"></div></article>
+      </div>
+      <div class="content-grid">
+        <article class="panel"><div class="panel-head"><h3>Monthly business value</h3><span class="panel-icon">⌁</span></div><div id="monthlyChart" class="simple-chart"></div></article>
+        <article class="panel"><div class="panel-head"><h3>Pending payment watchlist</h3><span class="panel-icon">◷</span></div><div id="pendingWatch" class="table-wrap"></div></article>
+      </div>
+      <article class="panel"><div class="panel-head"><h3>Latest records</h3><span class="muted" id="recordCount"></span></div><div id="latestRecords" class="table-wrap"></div></article>
+    </section>
+
+    <section id="page-add" class="page">
+      <div class="section-heading"><div><div class="eyebrow">NEW TRANSACTION</div><h2>Create a business record</h2><p>Totals and pending balance are calculated automatically.</p></div></div>
+      <form id="recordForm" class="panel form-panel">
+        <div class="form-grid">
+          <label>Record date<input type="date" id="recordDate" required></label>
+          <label>Customer name<input id="customerName" placeholder="Enter full customer name" required></label>
+          <label class="span-2">📍 Place / Village<input id="place" placeholder="Enter village, town or location" required></label>
+        </div>
+        <div class="form-divider"><span>🌾 Land details</span></div>
+        <div class="form-grid">
+          <label>Land area (guntha)<input type="number" id="land" min="0" step="0.01" value="0"></label>
+          <label>Price per guntha (₹)<input type="number" id="landRate" min="0" step="0.01" value="0"></label>
+        </div>
+        <div class="form-divider"><span>🛍️ Bag details</span></div>
+        <div class="form-grid">
+          <label>Number of bags<input type="number" id="bags" min="0" step="0.01" value="0"></label>
+          <label>Price per bag (₹)<input type="number" id="bagRate" min="0" step="0.01" value="0"></label>
+        </div>
+        <div class="form-divider"><span>💳 Payment details</span></div>
+        <div class="form-grid">
+          <label>Online payment (₹)<input type="number" id="online" min="0" step="0.01" value="0"></label>
+          <label>Cash payment (₹)<input type="number" id="cash" min="0" step="0.01" value="0"></label>
+        </div>
+        <div class="totals-strip"><div><small>Total business value</small><strong id="formTotal">₹0.00</strong></div><div><small>Total received</small><strong id="formPaid">₹0.00</strong></div><div><small>Pending balance</small><strong id="formBalance">₹0.00</strong></div></div>
+        <button class="btn btn-primary full" type="submit">Save record <span>→</span></button>
       </form>
-      <p id="authMessage" class="message" aria-live="polite"></p>
-      <p class="tiny">Create or authorize users in Supabase Authentication before signing in.</p>
-    </div>
-  </div>
+    </section>
 
-  <div id="appShell" class="app-shell hidden">
-    <aside class="sidebar">
-      <div class="brand">
-        <div class="brand-mark small">VA</div>
-        <div><strong>VARAD AGRO</strong><span>INDUSTRIES</span></div>
-      </div>
-      <div class="side-caption">WORKSPACE</div>
-      <nav id="nav">
-        <button class="nav-item active" data-page="dashboard">▦ <span>Dashboard</span></button>
-        <button class="nav-item" data-page="add">＋ <span>Add record</span></button>
-        <button class="nav-item" data-page="customers">♙ <span>Customers</span></button>
-        <button class="nav-item" data-page="analytics">↗ <span>Analytics</span></button>
-        <button class="nav-item" data-page="pending">₹ <span>Pending payments</span></button>
-        <button class="nav-item" data-page="records">▤ <span>Manage records</span></button>
-        <button class="nav-item" data-page="assistant">✳ <span>Business assistant</span></button>
-        <button class="nav-item" data-page="import">⇅ <span>Import / export</span></button>
-      </nav>
-      <div class="sidebar-bottom">
-        <span class="status-dot"></span><span id="connectionText">Checking database…</span>
-        <button id="logoutBtn" class="btn subtle full">Sign out</button>
-      </div>
-    </aside>
+    <section id="page-assistant" class="page">
+      <div class="section-heading"><div><div class="eyebrow">QUICK INSIGHTS</div><h2>Business assistant</h2><p>Ask a question about the records currently stored in your database.</p></div></div>
+      <article class="panel assistant-panel"><div class="assistant-symbol">✦</div><h3>What would you like to know?</h3><p class="muted">Choose a prompt or type your own question.</p>
+        <div class="prompt-grid"><button class="prompt" data-question="Give me a business summary">Business summary ↗</button><button class="prompt" data-question="How much payment is pending?">Pending balance ↗</button><button class="prompt" data-question="What is the total online collection?">Online collection ↗</button><button class="prompt" data-question="Who is my top customer?">Top customer ↗</button><button class="prompt" data-question="How many guntha do I have in records?">Total guntha ↗</button><button class="prompt" data-question="How many bags are recorded?">Total bags ↗</button></div>
+        <form id="assistantForm" class="assistant-input"><input id="assistantQuestion" placeholder="Ask about your business…" /><button class="btn btn-primary">Get answer →</button></form><div id="assistantAnswer" class="answer-box hidden"></div>
+      </article>
+    </section>
 
-    <main class="main">
-      <header class="topbar">
-        <div><p class="eyebrow">AGRICULTURE BUSINESS MANAGEMENT</p><h2 id="pageTitle">Dashboard</h2></div>
-        <div class="top-actions"><span id="todayLabel" class="date-pill"></span><button id="refreshBtn" class="btn outline">↻ Refresh</button></div>
-      </header>
-      <div id="notice" class="notice hidden" role="status"></div>
-      <section id="pageContent"></section>
-      <footer>VARAD AGRO INDUSTRIES <span>•</span> Keep regular CSV / Excel backups of your business records.</footer>
-    </main>
-  </div>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script type="module" src="/app.js"></script>
+    <section id="page-customers" class="page">
+      <div class="section-heading"><div><div class="eyebrow">RELATIONSHIPS</div><h2>Customer management</h2><p>Customer-level totals and transaction history.</p></div></div>
+      <article class="panel"><div class="toolbar"><input id="customerSearch" placeholder="Search customer…" /><span class="muted" id="customerCount"></span></div><div id="customersTable" class="table-wrap"></div></article>
+      <article class="panel" id="customerProfile"><div class="empty-state">Select a customer from the table to view their profile.</div></article>
+    </section>
+
+    <section id="page-analytics" class="page">
+      <div class="section-heading"><div><div class="eyebrow">PERFORMANCE</div><h2>Advanced analytics</h2><p>Review business value, land, bags and monthly collection.</p></div></div>
+      <div class="kpi-grid" id="analyticsKpis"></div>
+      <div class="content-grid"><article class="panel"><h3>Business value by customer</h3><div id="customerValueChart" class="bar-list"></div></article><article class="panel"><h3>Land and bags by customer</h3><div id="landBagChart" class="table-wrap"></div></article></div>
+      <article class="panel"><h3>Monthly performance</h3><div id="monthlyTable" class="table-wrap"></div></article>
+    </section>
+
+    <section id="page-pending" class="page">
+      <div class="section-heading"><div><div class="eyebrow">COLLECTIONS</div><h2>Pending payments</h2><p>Track outstanding balances and add received payments.</p></div></div>
+      <div class="kpi-grid" id="pendingKpi"></div>
+      <article class="panel"><div id="pendingTable" class="table-wrap"></div></article>
+      <article class="panel"><h3>Receive a payment</h3><form id="paymentForm" class="form-grid">
+        <label>Choose record<select id="paymentRecord" required></select></label>
+        <label>Online received (₹)<input type="number" id="onlineAdd" min="0" step="0.01" value="0"></label>
+        <label>Cash received (₹)<input type="number" id="cashAdd" min="0" step="0.01" value="0"></label>
+        <div class="form-end"><button class="btn btn-primary" type="submit">Confirm payment & update →</button></div>
+      </form></article>
+    </section>
+
+    <section id="page-manage" class="page">
+      <div class="section-heading"><div><div class="eyebrow">RECORD CONTROL</div><h2>Manage records</h2><p>Edit or delete entries stored in Supabase.</p></div></div>
+      <article class="panel"><div class="toolbar"><input id="manageSearch" placeholder="Search name, village or ID…" /><span class="muted">Changes affect the live database</span></div><div id="manageTable" class="table-wrap"></div></article>
+      <article class="panel" id="editPanel"><div class="empty-state">Choose Edit on a record to update it.</div></article>
+    </section>
+
+    <section id="page-import" class="page">
+      <div class="section-heading"><div><div class="eyebrow">YOUR DATA</div><h2>Import / Export</h2><p>Keep a regular backup of your business records.</p></div></div>
+      <div class="content-grid"><article class="panel"><div class="panel-head"><h3>Export records</h3><span class="panel-icon">↓</span></div><p class="muted">Download the current land and bag records as CSV or Excel-compatible CSV.</p><button class="btn btn-primary full" id="exportCsv">Download records CSV</button><button class="btn btn-soft full spaced" id="exportCustomers">Download customer summary CSV</button><button class="btn btn-soft full spaced" id="exportDiesel">Download diesel CSV</button></article>
+      <article class="panel"><div class="panel-head"><h3>Import CSV</h3><span class="panel-icon">↑</span></div><p class="muted">CSV headers must match the field names shown in the original app.</p><input type="file" id="csvFile" accept=".csv,text/csv"><div id="importPreview" class="table-wrap"></div><button class="btn btn-primary full spaced" id="importCsv" disabled>Import previewed rows</button><p class="tiny-note">Import inserts new rows. Check the preview carefully to avoid duplicates.</p></article></div>
+    </section>
+
+    <section id="page-diesel" class="page">
+      <div class="section-heading"><div><div class="eyebrow">FUEL EXPENSES</div><h2>Diesel management</h2><p>Record diesel purchases separately from customer transactions.</p></div></div>
+      <div class="kpi-grid" id="dieselKpis"></div>
+      <form id="dieselForm" class="panel form-panel"><h3>Add diesel expense</h3><div class="form-grid">
+        <label>Purchase date<input type="date" id="dieselDate" required></label><label>Vehicle / Machine<input id="vehicle" placeholder="Harvester / Tractor" required></label>
+        <label>Place / Vendor<input id="dieselPlace" placeholder="Village or petrol pump"></label><label>Quantity (litres)<input type="number" id="litres" min="0.01" step="0.01" required></label>
+        <label>Price per litre (₹)<input type="number" id="dieselRate" min="0.01" step="0.01" required></label><label>Notes<input id="dieselNotes" placeholder="Trip or receipt number"></label>
+      </div><div class="totals-strip one"><div><small>Total diesel expense</small><strong id="dieselTotal">₹0.00</strong></div></div><button class="btn btn-primary full" type="submit">Save diesel record →</button></form>
+      <article class="panel"><div class="panel-head"><h3>Diesel purchase history</h3><button class="btn btn-soft" id="dieselCsv">Download CSV</button></div><div id="dieselTable" class="table-wrap"></div></article>
+    </section>
+
+    <footer class="footer"><span>VARAD AGRO INDUSTRIES</span><span>Made for smarter farm-business records · <span id="year"></span></span></footer>
+  </main>
+  <dialog id="confirmDialog" class="dialog"><form method="dialog"><h3>Delete this record?</h3><p>This action permanently removes the selected record from Supabase.</p><div class="dialog-actions"><button class="btn btn-soft" value="cancel">Cancel</button><button class="btn btn-danger" id="confirmDelete" value="confirm">Delete permanently</button></div></form></dialog>
+  <script src="app.js"></script>
 </body>
 </html>
